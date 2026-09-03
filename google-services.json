@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "958772119359",
+    "project_id": "isasfamily-92972",
+    "storage_bucket": "isasfamily-92972.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:958772119359:android:5da95c364fd25c23d6b58a",
+        "android_client_info": {
+          "package_name": "com.isasfamily.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAS1hpHsZhjI3UTfEzotXDI3u8Xz9-dP14"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
