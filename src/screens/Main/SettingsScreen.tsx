@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
 import { AuthContext } from '../../contexts/AuthContext';
 import { ThemeContext, ThemePreference } from '../../contexts/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
@@ -124,10 +124,18 @@ export default function SettingsScreen() {
       {/* SESSÃO */}
       <TouchableOpacity 
         style={[styles.logoutBtn, { backgroundColor: colors.surface }]}
-        onPress={() => Alert.alert('Sair', 'Tem certeza que deseja sair?', [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Sair', style: 'destructive', onPress: signOut }
-        ])}
+        onPress={() => {
+          if (Platform.OS === 'web') {
+            if (window.confirm('Tem certeza que deseja sair?')) {
+              signOut();
+            }
+          } else {
+            Alert.alert('Sair', 'Tem certeza que deseja sair?', [
+              { text: 'Cancelar', style: 'cancel' },
+              { text: 'Sair', style: 'destructive', onPress: signOut }
+            ]);
+          }
+        }}
       >
         <LogOut color={colors.error} size={20} />
         <Text style={[styles.logoutText, { color: colors.error }]}>Sair da conta</Text>
