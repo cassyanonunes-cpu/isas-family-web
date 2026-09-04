@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Share } from 'react-native';
 import api from '../../services/api';
 import { theme } from '../../theme/theme';
 
@@ -61,7 +61,11 @@ export default function FamilyScreen() {
               <TouchableOpacity style={styles.inviteButton} onPress={async () => {
                 try {
                   const res = await api.post('/invitations');
-                  alert(`Convite gerado com sucesso!\nCódigo: ${res.data.invitation.code}`);
+                  const code = res.data.invitation.code;
+                  await Share.share({
+                    message: `Junte-se à minha família no app Isas Family!\nUse o código de convite: ${code}`,
+                    title: 'Convite para Isas Family'
+                  });
                 } catch (e: any) {
                   alert(e.response?.data?.error || 'Erro ao gerar convite');
                 }
