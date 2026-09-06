@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Share } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Share, Platform } from 'react-native';
 import api from '../../services/api';
 import { theme } from '../../theme/theme';
 
@@ -11,23 +11,64 @@ type Member = {
   email: string;
 };
 
+type Location = {
+  id: string;
+  userId: string;
+  latitude: number;
+  longitude: number;
+  updatedAt: string;
+  user: {
+    displayName: string;
+  }
+};
+
 export default function FamilyScreen() {
   const [members, setMembers] = useState<Member[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadMembers();
+    loadData();
   }, []);
 
-  const loadMembers = async () => {
+  const loadData = async () => {
     try {
-      const res = await api.get('/family/members');
-      setMembers(res.data.members);
+      const resMembers = await api.get('/family/members');
+      setMembers(resMembers.data.members);
+      
+      const resLocations = await api.get('/locations');
+      setLocations(resLocations.data.locations);
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderMiniMap = () => {
+    if (Platform.OS !== 'web' || locations.length === 0) return null;
+    
+    // Calcula o centro do mapa com base na primeira localização disponível
+    const centerLat = locations[0].latitude;
+    const centerLng = locations[0].longitude;
+    
+    // Constrói os marcadores para o OSM
+    // Formato: marker=lat,lon&marker=lat2,lon2
+    const markers = locations.map(l => `marker=${l.latitude},${l.longitude}`).join('&');
+
+    return (
+      <View style={styles.mapContainer}>
+        <Text style={styles.mapTitle}>Localização da Família</Text>
+        <iframe
+          width="100%"
+          height="200"
+          frameBorder="0"
+          scrolling="no"
+          src={`https://www.openstreetmap.org/export/embed.html?bbox=${centerLng-0.05}%2C${centerLat-0.05}%2C${centerLng+0.05}%2C${centerLat+0.05}&layer=mapnik&${markers}`}
+          style={{ borderRadius: 12, marginTop: 10, border: '1px solid #333' }}
+        />
+      </View>
+    );
   };
 
   const renderItem = ({ item }: { item: Member }) => (
@@ -56,30 +97,30 @@ export default function FamilyScreen() {
           renderItem={renderItem}
           contentContainerStyle={styles.list}
           ListHeaderComponent={
-            <View style={styles.headerContainer}>
-              <Text style={styles.headerTitle}>Membros da Família</Text>
-              <TouchableOpacity style={styles.inviteButton} onPress={async () => {
-                try {
-                  const res = await api.post('/invitations');
-                  const code = res.data.invitation.code;
-                  
-                  // Tenta usar a API nativa de compartilhamento
+            <View>
+              <View style={styles.headerContainer}>
+                <Text style={styles.headerTitle}>Membros da Família</Text>
+                <TouchableOpacity style={styles.inviteButton} onPress={async () => {
                   try {
-                    await Share.share({
-                      message: `Junte-se à minha família no app Isas Family!\nUse o código de convite: ${code}`,
-                      title: 'Convite para Isas Family'
-                    });
-                  } catch (shareError) {
-                    // Fallback para Web/Desktop onde o Share pode falhar por ser assíncrono
-                    // Usamos prompt para que o usuário possa copiar o texto
-                    prompt('Convite gerado! Copie o código abaixo:', code);
+                    const res = await api.post('/invitations');
+                    const code = res.data.invitation.code;
+                    
+                    try {
+                      await Share.share({
+                        message: `Junte-se à minha família no app Isas Family!\nUse o código de convite: ${code}`,
+                        title: 'Convite para Isas Family'
+                      });
+                    } catch (shareError) {
+                      prompt('Convite gerado! Copie o código abaixo:', code);
+                    }
+                  } catch (e: any) {
+                    alert(e.response?.data?.error || 'Erro ao gerar convite');
                   }
-                } catch (e: any) {
-                  alert(e.response?.data?.error || 'Erro ao gerar convite');
-                }
-              }}>
-                <Text style={styles.inviteButtonText}>+ Novo Convite</Text>
-              </TouchableOpacity>
+                }}>
+                  <Text style={styles.inviteButtonText}>+ Novo Convite</Text>
+                </TouchableOpacity>
+              </View>
+              {renderMiniMap()}
             </View>
           }
         />
@@ -92,6 +133,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  mapContainer: {
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing.md,
+    borderRadius: theme.border.radius.lg,
+    marginBottom: theme.spacing.md,
+    elevation: 2,
+  },
+  mapTitle: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: 'bold',
+    color: theme.colors.text,
+    marginBottom: theme.spacing.xs,
   },
   center: {
     flex: 1,

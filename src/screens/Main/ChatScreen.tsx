@@ -257,7 +257,14 @@ export default function ChatScreen() {
         formData.append('type', 'AUDIO');
         formData.append('clientMessageId', Crypto.randomUUID());
         formData.append('duration', (recordingDuration * 1000).toString());
-        formData.append('file', { uri, name: 'audio.m4a', type: 'audio/m4a' } as any);
+        
+        if (Platform.OS === 'web') {
+          const response = await fetch(uri);
+          const blob = await response.blob();
+          formData.append('file', blob, 'audio.m4a');
+        } else {
+          formData.append('file', { uri, name: 'audio.m4a', type: 'audio/m4a' } as any);
+        }
 
         await api.post(`/chat/conversations/${conversationId}/messages/upload`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
@@ -460,10 +467,26 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   messageBubble: {
-    maxWidth: '80%',
-    padding: 10,
-    borderRadius: 15,
-    marginBottom: 10,
+    maxWidth: '85%',
+    padding: 14,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  myMessage: {
+    backgroundColor: colors.myMessageBg,
+    alignSelf: 'flex-end',
+    borderBottomRightRadius: 4,
+  },
+  otherMessage: {
+    backgroundColor: colors.otherMessageBg,
+    alignSelf: 'flex-start',
+    borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   timeRow: {
     flexDirection: 'row',

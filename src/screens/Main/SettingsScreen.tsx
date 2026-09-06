@@ -103,11 +103,11 @@ export default function SettingsScreen() {
       </View>
 
       {/* APARÊNCIA */}
-      <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Aparência</Text>
+      <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>Temas Disponíveis</Text>
       <View style={[styles.themeContainer, { backgroundColor: colors.background }]}>
-        {renderThemeOption('SYSTEM', 'Sistema', Monitor)}
-        {renderThemeOption('LIGHT', 'Claro', Sun)}
-        {renderThemeOption('DARK', 'Escuro', Moon)}
+        {renderThemeOption('INDIGO', 'Índigo', Monitor)}
+        {renderThemeOption('PINK', 'Rosa', Sun)}
+        {renderThemeOption('BLACK', 'Preto', Moon)}
       </View>
 
       {/* SOBRE */}
