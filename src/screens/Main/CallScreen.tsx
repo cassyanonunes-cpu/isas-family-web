@@ -71,7 +71,7 @@ export default function CallScreen() {
       <View style={styles.flexContainer}>
         {isVideo && callState.remoteStream && (
           <RTCView
-            streamURL={Platform.OS === 'web' ? callState.remoteStream : callState.remoteStream.toURL()}
+            streamURL={Platform.OS === 'web' ? callState.remoteStream : (callState.remoteStream as any).toURL()}
             style={styles.remoteVideo}
             objectFit="cover"
           />
@@ -79,7 +79,7 @@ export default function CallScreen() {
         
         {isVideo && callState.localStream && (
           <RTCView
-            streamURL={Platform.OS === 'web' ? callState.localStream : callState.localStream.toURL()}
+            streamURL={Platform.OS === 'web' ? callState.localStream : (callState.localStream as any).toURL()}
             style={styles.localVideo}
             objectFit="cover"
             muted={true}
