@@ -299,7 +299,14 @@ export default function ChatScreen() {
         const fileName = asset.fileName || asset.name || 'file';
         const mimeType = asset.mimeType || 'application/octet-stream';
         
-        formData.append('file', { uri: asset.uri, name: fileName, type: mimeType } as any);
+        if (Platform.OS === 'web') {
+          // Na Web, FormData exige um objeto File/Blob real, não um objeto json simulando o arquivo
+          const response = await fetch(asset.uri);
+          const blob = await response.blob();
+          formData.append('file', blob, fileName);
+        } else {
+          formData.append('file', { uri: asset.uri, name: fileName, type: mimeType } as any);
+        }
         
         await api.post(`/chat/conversations/${conversationId}/messages/upload`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }

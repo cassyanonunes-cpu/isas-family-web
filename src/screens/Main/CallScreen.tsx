@@ -2,8 +2,23 @@ import React, { useContext, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, SafeAreaView, Platform } from 'react-native';
 import { CallContext } from '../../contexts/CallContext';
 
-let RTCView: any = View; // fallback for web
-if (Platform.OS !== 'web') {
+let RTCView: any;
+if (Platform.OS === 'web') {
+  RTCView = (props: any) => {
+    const videoRef = React.useRef<HTMLVideoElement>(null);
+    React.useEffect(() => {
+      if (videoRef.current && props.streamURL) {
+        // Na Web, streamURL é na verdade o objeto MediaStream nativo passado pelo CallContext
+        try {
+          videoRef.current.srcObject = props.streamURL;
+        } catch (error) {
+          console.error("Erro ao definir srcObject no vídeo Web", error);
+        }
+      }
+    }, [props.streamURL]);
+    return <video ref={videoRef} autoPlay playsInline style={props.style as any} muted={props.muted} />;
+  };
+} else {
   RTCView = require('react-native-webrtc').RTCView;
 }
 
@@ -56,7 +71,7 @@ export default function CallScreen() {
       <View style={styles.flexContainer}>
         {isVideo && callState.remoteStream && (
           <RTCView
-            streamURL={callState.remoteStream.toURL()}
+            streamURL={Platform.OS === 'web' ? callState.remoteStream : callState.remoteStream.toURL()}
             style={styles.remoteVideo}
             objectFit="cover"
           />
@@ -64,9 +79,10 @@ export default function CallScreen() {
         
         {isVideo && callState.localStream && (
           <RTCView
-            streamURL={callState.localStream.toURL()}
+            streamURL={Platform.OS === 'web' ? callState.localStream : callState.localStream.toURL()}
             style={styles.localVideo}
             objectFit="cover"
+            muted={true}
           />
         )}
 

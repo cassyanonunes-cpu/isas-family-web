@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, ScrollView, Platform } from 'react-native';
 import { AuthContext } from '../../contexts/AuthContext';
 import { theme } from '../../theme/theme';
 import * as ImagePicker from 'expo-image-picker';
@@ -33,11 +33,17 @@ export default function ProfileScreen() {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('file', {
-        uri,
-        name: 'avatar.jpg',
-        type: 'image/jpeg',
-      } as any);
+      if (Platform.OS === 'web') {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        formData.append('file', blob, 'avatar.jpg');
+      } else {
+        formData.append('file', {
+          uri,
+          name: 'avatar.jpg',
+          type: 'image/jpeg',
+        } as any);
+      }
 
       // Assumindo endpoint de upload de avatar genérico ou o que criamos
       // Vamos usar a mesma logica de storage (ex: POST /users/me/avatar)
