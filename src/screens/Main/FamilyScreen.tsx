@@ -70,8 +70,9 @@ export default function FamilyScreen() {
                       title: 'Convite para Isas Family'
                     });
                   } catch (shareError) {
-                    // Fallback para Web/Desktop onde o Share pode não ser suportado
-                    alert(`Seu código de convite é: ${code}\nCompartilhe este código com seus familiares!`);
+                    // Fallback para Web/Desktop onde o Share pode falhar por ser assíncrono
+                    // Usamos prompt para que o usuário possa copiar o texto
+                    prompt('Convite gerado! Copie o código abaixo:', code);
                   }
                 } catch (e: any) {
                   alert(e.response?.data?.error || 'Erro ao gerar convite');
