@@ -62,10 +62,17 @@ export default function FamilyScreen() {
                 try {
                   const res = await api.post('/invitations');
                   const code = res.data.invitation.code;
-                  await Share.share({
-                    message: `Junte-se à minha família no app Isas Family!\nUse o código de convite: ${code}`,
-                    title: 'Convite para Isas Family'
-                  });
+                  
+                  // Tenta usar a API nativa de compartilhamento
+                  try {
+                    await Share.share({
+                      message: `Junte-se à minha família no app Isas Family!\nUse o código de convite: ${code}`,
+                      title: 'Convite para Isas Family'
+                    });
+                  } catch (shareError) {
+                    // Fallback para Web/Desktop onde o Share pode não ser suportado
+                    alert(`Seu código de convite é: ${code}\nCompartilhe este código com seus familiares!`);
+                  }
                 } catch (e: any) {
                   alert(e.response?.data?.error || 'Erro ao gerar convite');
                 }
