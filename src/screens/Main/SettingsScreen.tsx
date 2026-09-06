@@ -121,6 +121,34 @@ export default function SettingsScreen() {
         </View>
       </View>
 
+      {/* ATUALIZAÇÃO */}
+      <TouchableOpacity 
+        style={[styles.logoutBtn, { backgroundColor: colors.primary, marginTop: 10, marginBottom: 10 }]}
+        onPress={async () => {
+          if (Platform.OS === 'web') {
+            try {
+              if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                for (let reg of regs) {
+                  await reg.unregister();
+                }
+              }
+              const keys = await caches.keys();
+              for (let key of keys) {
+                await caches.delete(key);
+              }
+              window.location.reload(true as any);
+            } catch (e) {
+              window.location.reload();
+            }
+          } else {
+            Alert.alert('Pronto', 'O aplicativo nativo se atualiza automaticamente ao reiniciar.');
+          }
+        }}
+      >
+        <Text style={[styles.logoutText, { color: '#FFF' }]}>Buscar Atualizações Agora</Text>
+      </TouchableOpacity>
+
       {/* SESSÃO */}
       <TouchableOpacity 
         style={[styles.logoutBtn, { backgroundColor: colors.surface }]}
