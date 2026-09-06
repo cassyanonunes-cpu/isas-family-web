@@ -100,25 +100,6 @@ export default function FamilyScreen() {
             <View>
               <View style={styles.headerContainer}>
                 <Text style={styles.headerTitle}>Membros da Família</Text>
-                <TouchableOpacity style={styles.inviteButton} onPress={async () => {
-                  try {
-                    const res = await api.post('/invitations');
-                    const code = res.data.invitation.code;
-                    
-                    try {
-                      await Share.share({
-                        message: `Junte-se à minha família no app Isas Family!\nUse o código de convite: ${code}`,
-                        title: 'Convite para Isas Family'
-                      });
-                    } catch (shareError) {
-                      prompt('Convite gerado! Copie o código abaixo:', code);
-                    }
-                  } catch (e: any) {
-                    alert(e.response?.data?.error || 'Erro ao gerar convite');
-                  }
-                }}>
-                  <Text style={styles.inviteButtonText}>+ Novo Convite</Text>
-                </TouchableOpacity>
               </View>
               {renderMiniMap()}
             </View>

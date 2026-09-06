@@ -1,72 +1,58 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Platform, Alert } from 'react-native';
 import { AuthContext } from '../../contexts/AuthContext';
 import { theme } from '../../theme/theme';
 import api from '../../services/api';
+import { User } from 'lucide-react-native';
 
 export default function LoginScreen() {
   const { signIn } = useContext(AuthContext);
-  const [code, setCode] = useState('');
-  const [name, setName] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loadingName, setLoadingName] = useState<string | null>(null);
 
-  const handleLogin = async () => {
-    if (!code || !name) {
-      Alert.alert('Erro', 'Preencha todos os campos');
-      return;
-    }
-
-    setLoading(true);
+  const handleLogin = async (name: string) => {
+    setLoadingName(name);
     try {
-      const response = await api.post('/auth/invite-login', {
-        code: code.trim(),
-        name: name.trim(),
-        platform: 'NATIVE', // Identificador simples para a API
-        identifier: 'app-mobile'
+      const response = await api.post('/auth/name-login', {
+        name,
+        platform: Platform.OS,
+        identifier: 'app-isas-family'
       });
 
       await signIn(response.data);
     } catch (error: any) {
-      const msg = error.response?.data?.error || 'Erro de conexão ou convite inválido';
-      Alert.alert('Falha ao Entrar', msg);
-    } finally {
-      setLoading(false);
+      const msg = error.response?.data?.error || 'Erro ao conectar. Tente novamente.';
+      Alert.alert('Erro no Acesso', msg);
+      setLoadingName(null);
     }
   };
+
+  const names = ['Cassyano', 'Isadora', 'Isabella'];
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Isas Family</Text>
-        <Text style={styles.subtitle}>Insira o convite para acessar</Text>
+        <Text style={styles.subtitle}>Quem está acessando?</Text>
       </View>
 
       <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Código de Convite"
-          autoCapitalize="none"
-          value={code}
-          onChangeText={setCode}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Seu Nome"
-          value={name}
-          onChangeText={setName}
-        />
-
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFF" />
-          ) : (
-            <Text style={styles.buttonText}>ENTRAR</Text>
-          )}
-        </TouchableOpacity>
+        {names.map(name => (
+          <TouchableOpacity 
+            key={name}
+            style={styles.button} 
+            onPress={() => handleLogin(name)}
+            disabled={loadingName !== null}
+          >
+            {loadingName === name ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <>
+                <User color="#FFF" size={24} style={styles.icon} />
+                <Text style={styles.buttonText}>{name}</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );
@@ -95,26 +81,28 @@ const styles = StyleSheet.create({
   },
   form: {
     width: '100%',
-  },
-  input: {
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.border.radius.md,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-    fontSize: theme.typography.sizes.md,
+    gap: 15, // Apenas react-native-web e novas versões aceitam gap, mas vamos usar margin bottom no botão para segurança
   },
   button: {
+    flexDirection: 'row',
     backgroundColor: theme.colors.primary,
-    padding: theme.spacing.md,
-    borderRadius: theme.border.radius.md,
+    padding: 20,
+    borderRadius: 16,
     alignItems: 'center',
-    marginTop: theme.spacing.sm,
+    justifyContent: 'center',
+    marginBottom: 16, // Fallback do gap
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  icon: {
+    marginRight: 10,
   },
   buttonText: {
-    color: theme.colors.surface,
+    color: '#FFF', // Força branco para contraste
     fontWeight: 'bold',
-    fontSize: theme.typography.sizes.md,
+    fontSize: 20, // Maior para ser premium
   }
 });
