@@ -477,16 +477,13 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   myMessage: {
-    backgroundColor: colors.myMessageBg,
     alignSelf: 'flex-end',
     borderBottomRightRadius: 4,
   },
   otherMessage: {
-    backgroundColor: colors.otherMessageBg,
     alignSelf: 'flex-start',
     borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: colors.border,
   },
   timeRow: {
     flexDirection: 'row',
